@@ -1,0 +1,32 @@
+$bg-color: #f0f8ff;
+$focus-color: rgba(3, 102, 214, 0.3) 0px 0px 0px 3px;
+
+@mixin form-item-style {
+  width: 48%;
+  display: flex;
+  flex-direction: column;
+  margin: 0.5em 0;
+  @media screen and (max-width: 767px) {
+    width: 100%;
+  }
+}
+
+@mixin select-styles {
+  padding: 0.3em;
+  font-size: 16px;
+  border: 1px solid gainsboro;
+  border-radius: 0.2em;
+  background-color: $bg-color;
+}
+
+@mixin field-focus {
+  box-shadow: $focus-color;
+  outline: none;
+}
+
+@mixin font-styles {
+  font: {
+    family: "Rubik", sans-serif;
+    weight: 400;
+  }
+}
