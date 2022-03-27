@@ -12,21 +12,29 @@
           type="text"
           id="lastname"
           v-model="person.lastname"
-          :isInvalid="$v.person.lastname.$dirty && !$v.person.lastname.required"
+          :isInvalid="
+            ($v.person.lastname.$dirty && !$v.person.lastname.required) ||
+            (!!$v.person.lastname.$model && !$v.person.lastname.alphaCyrillic)
+          "
           ><span
             v-if="$v.person.lastname.$dirty && !$v.person.lastname.required"
             class="error-text"
             >Поле обязательное для заполнения</span
           >
           <span
-            v-if="$v.person.lastname.$dirty && !$v.person.lastname.alpha"
+            v-if="
+              !!$v.person.lastname.$model && !$v.person.lastname.alphaCyrillic
+            "
             class="error-text"
-            >Фамилия не может содержать цифры</span
+            >Фамилия не может содержать цифры и символы</span
           >
         </UserInput>
         <UserInput
           v-model="person.name"
-          :isInvalid="$v.person.name.$dirty && !$v.person.name.required"
+          :isInvalid="
+            ($v.person.name.$dirty && !$v.person.name.required) ||
+            (!!$v.person.name.$model && !$v.person.name.alphaCyrillic)
+          "
           label="Имя"
           type="text"
           id="name"
@@ -37,9 +45,9 @@
             >Поле обязательное для заполнения</span
           >
           <span
-            v-if="$v.person.name.$dirty && !$v.person.name.alpha"
+            v-if="!!$v.person.name.$model && !$v.person.name.alphaCyrillic"
             class="error-text"
-            >Имя не может содержать цифры</span
+            >Имя не может содержать цифры и символы</span
           >
         </UserInput>
         <UserInput
@@ -76,15 +84,16 @@
             >Поле обязательное для заполнения</span
           >
           <span v-if="!$v.person.phone.maxLength" class="error-text">
-            Максимум 11 цифр.</span
+            Не больше 11 цифр.</span
           >
           <span v-if="!$v.person.phone.minLength" class="error-text">
-            Осталось
-            {{ $v.person.phone.$params.minLength.min - person.phone.length }}
-            цифр.</span
+            Количество оставшихся цифр
+            {{
+              $v.person.phone.$params.minLength.min - person.phone.length
+            }}.</span
           >
           <span
-            v-if="$v.person.phone.$dirty && !$v.person.phone.startsWith"
+            v-if="!!$v.person.phone.$model && !$v.person.phone.startsWith"
             class="error-text"
             >Номер телефона должен начинаться с цифры "7"</span
           >
@@ -246,14 +255,10 @@
 </template>
 
 <script>
-import {
-  required,
-  minLength,
-  maxLength,
-  alpha,
-} from "vuelidate/lib/validators";
+import { required, minLength, maxLength } from "vuelidate/lib/validators";
 const startsWith = (param) => (value) =>
   value.toString().split("")[0] === param;
+const alphaCyrillic = (value) => /^[a-zA-Zwа-яА-Я]+$/.test(value);
 import UserInput from "./ui/UserInput.vue";
 import UserSelect from "./ui/UserSelect.vue";
 import UserCheckbox from "./ui/UserCheckbox.vue";
@@ -262,7 +267,6 @@ export default {
   components: { UserInput, UserSelect, UserCheckbox, Toast },
   data() {
     return {
-      message: "",
       showToast: false,
       person: {
         lastname: "",
@@ -294,8 +298,8 @@ export default {
   },
   validations: {
     person: {
-      lastname: { required, alpha },
-      name: { required, alpha },
+      lastname: { required, alphaCyrillic },
+      name: { required, alphaCyrillic },
       birth_date: { required },
       phone: {
         required,
@@ -317,14 +321,17 @@ export default {
       }
     },
   },
+  computed: {
+    message() {
+      return this.$v.$invalid
+        ? "Заполните форму корректно."
+        : "Новый клиент успешно создан.";
+    },
+  },
   methods: {
     send() {
       if (this.$v.$invalid) {
         this.$v.$touch();
-        this.message = "Заполните форму корректно.";
-        // return;
-      } else {
-        this.message = "Новый клиент успешно создан.";
       }
       this.showToast = true;
     },

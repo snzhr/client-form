@@ -1,6 +1,6 @@
 <template>
   <label class="form-item" :for="id">
-    <span>{{ label }} - {{ value }}</span>
+    <span>{{ label }}</span>
     <input
       :value="value"
       @input="$emit('input', $event.target.value)"
